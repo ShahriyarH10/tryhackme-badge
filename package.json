@@ -1,0 +1,6 @@
+{
+  "name": "thm-badge",
+  "version": "1.0.0",
+  "description": "TryHackMe badge generator",
+  "type": "module"
+}

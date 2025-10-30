@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/thm-badge.js": {
+      "maxDuration": 10
+    }
+  }
+}
