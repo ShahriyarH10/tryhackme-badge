@@ -1,65 +1,31 @@
-export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).send('Method not allowed');
-  }
-
-  const userPublicId = req.query.userPublicId || "4801665";
-  const apiUrl = `https://tryhackme.com/api/badges/public-profile/${userPublicId}`;
-
-  try {
-    const response = await fetch(apiUrl);
-    
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+// Example: Convert API data to SVG chart
+async function convertApiToSvg() {
+    try {
+        // Fetch data from API
+        const response = await fetch('https://tryhackme.com/api/v2/badges/public-profile?userPublicId=4801665');
+        const data = await response.json();
+        
+        // Generate SVG from data
+        const svg = generateSvgFromData(data);
+        return svg;
+    } catch (error) {
+        console.error('Error converting API to SVG:', error);
     }
+}
 
-    const data = await response.json();
-    const userName = data.userName || "Unknown User";
-    const totalBadges = data.badges ? data.badges.length : 0;
-
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="350" height="120">
-        <rect width="350" height="120" fill="#0d1117" rx="10" />
-        <text x="175" y="40" font-family="Arial" font-size="16" fill="#00ff88" text-anchor="middle" font-weight="bold">
-          TryHackMe Profile
-        </text>
-        <text x="175" y="70" font-family="Arial" font-size="14" fill="#ffffff" text-anchor="middle">
-          ${userName.replace(/[<>&]/g, '')}
-        </text>
-        <text x="175" y="95" font-family="Arial" font-size="12" fill="#cccccc" text-anchor="middle">
-          Badges: ${totalBadges}
-        </text>
-      </svg>
-    `;
-
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.status(200).send(svg);
-
-  } catch (error) {
-    console.error('Error:', error);
+function generateSvgFromData(data) {
+    const width = 400;
+    const height = 300;
     
-    const errorSvg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="350" height="120">
-        <rect width="350" height="120" fill="#2d1b1b" rx="10" />
-        <text x="175" y="60" font-family="Arial" font-size="14" fill="#ff4444" text-anchor="middle">
-          Error loading profile
-        </text>
-      </svg>
+    return `
+        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+            ${data.map((item, index) => `
+                <rect x="${index * 40}" y="${height - item.value}" 
+                      width="30" height="${item.value}" 
+                      fill="${item.color || '#3498db'}"/>
+                <text x="${index * 40 + 15}" y="${height - 10}" 
+                      text-anchor="middle" font-size="12">${item.label}</text>
+            `).join('')}
+        </svg>
     `;
-    
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.status(500).send(errorSvg);
-  }
 }
