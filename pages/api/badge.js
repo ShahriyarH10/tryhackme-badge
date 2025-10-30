@@ -35,7 +35,7 @@ export default async function handler(req, res) {
           TryHackMe Profile
         </text>
         <text x="175" y="70" font-family="Arial" font-size="14" fill="#ffffff" text-anchor="middle">
-          ${userName}
+          ${userName.replace(/[<>&]/g, '')}
         </text>
         <text x="175" y="95" font-family="Arial" font-size="12" fill="#cccccc" text-anchor="middle">
           Badges: ${totalBadges}
